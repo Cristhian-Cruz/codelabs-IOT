@@ -2,6 +2,7 @@
 #define LED 2
 #include "libwiFi.h"
 #include <WiFi.h>
+#include "Adafruit_SHT31.h"
 
 const char* ssid = "MIRED"; //nombre de la red wifi
 const char* password = "a1b2c3d4"; //contraseña de la red wifi
@@ -10,18 +11,24 @@ const int port = 8080; //puerto al que se va a conectar
 int temperatura;
 int humedad;
 
+Adafruit_SHT31 sht31 = Adafruit_SHT31();//creamos un objeto de la clase Adafruit_SHT31
+
 void setup() {
   pinMode(LED, OUTPUT);
   //conectar a la red wifi
   Serial.begin(115200);
   Serial.println("Iniciando conexion a la red wifi");
   conectarWifi(ssid, password);
+  if (!sht31.begin(0x44)) {  // Dirección I2C del sensor (0x44 o 0x45)
+    Serial.println("¡Error! No se encontró el SHT31");
+    while (1); // Detener ejecución
+}
 
 }
 
 void loop() {
-  temperatura = random(0, 100);
-  humedad = random(0, 100);
+  temperatura = sht31.readTemperature();
+  humedad = sht31.readHumidity();
   Serial.println("Temperatura: " + String(temperatura) + " Humedad: " + String(humedad));
   WiFiClient client;
 
